@@ -9,9 +9,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
-
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.web.multipart.MultipartFile;
 
+@org.springframework.stereotype.Service
 public class Service {
 	public static Map<Boolean, String> upload(MultipartFile file) {
 		Map<Boolean, String> response = new HashMap<Boolean, String>();
@@ -27,7 +28,7 @@ public class Service {
 
 		String staticUrl = "images/"+ name;
 		String saveUrl = getStaticDirectory() + staticUrl;
-
+		System.out.println(saveUrl);
 		File destFile = new File(saveUrl);
 		if (!destFile.getParentFile().exists()) {
 			destFile.getParentFile().mkdirs();
@@ -42,7 +43,7 @@ public class Service {
 		return response;
 	}
 
-	public String makeFileName(String file) {
+	public static String makeFileName(String file) {
 		String attcFileNm = UUID.randomUUID().toString().replaceAll("-", "");
 		String attcFileOriExt = fileExtCheck(file.substring(file.lastIndexOf(".")));
 		if (attcFileOriExt.isEmpty())
@@ -50,7 +51,7 @@ public class Service {
 		return attcFileNm + attcFileOriExt;
 	}
 
-	public String fileExtCheck(String originalFileExtension) {
+	public static String fileExtCheck(String originalFileExtension) {
 		originalFileExtension = originalFileExtension.toLowerCase();
 		if (originalFileExtension.equals(".jpg") || originalFileExtension.equals(".gif")
 			|| originalFileExtension.equals(".png") || originalFileExtension.equals(".jpeg")
@@ -59,4 +60,5 @@ public class Service {
 		}
 		return "";
 	}
+
 }

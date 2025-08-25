@@ -1,15 +1,49 @@
 "use client";
 
+import axios from 'axios';
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 type Preview = { url: string; file: File };
+const address = process.env.NEXT_PUBLIC_ADDRESS;
 
 export default function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState<Preview | null>(null);
+  const [file, setFile] = useState<File | null>(null)
+
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+      const formData = new FormData()
+      formData.append('file', file)
+      try {
+        const response = await axios.post(
+          address +'/api/image/upload',
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        )
+        if (response.status === 200) {
+          if (response.data.success) {
+            alert(`이미지가 성공적으로 업로드되었습니다.`)
+            setImageUrl(`${baseDir}${response.data.message}`)
+          } else {
+            alert('지원하지않는 파일 형식입니다.')
+          }
+        } else {
+          alert('이미지 업로드 실패했습니다.')
+        }
+      } catch (error) {
+        alert(`업로드 중 오류 발생: ${error}`)
+      }
+    }
+  }
 
   const addFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) return;
@@ -21,7 +55,6 @@ export default function App() {
 
     // 이전 미리보기 정리
     if (preview) URL.revokeObjectURL(preview.url);
-
     setPreview(next);
   }, [preview]);
 
@@ -49,10 +82,41 @@ export default function App() {
   const onClickDropZone = () => inputRef.current?.click();
 
   const onChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) addFile(e.target.files[0]);
+    if (e.target.files && e.target.files[0]){
+        alert("asd")
+        addFile(e.target.files[0]);
+        setFile(e.target.files[0])
+        } addFile(e.target.files[0]);
     e.target.value = ""; // 같은 파일 다시 선택 가능
   };
+  const send = async() => {
+      const formData = new FormData()
+    formData.append('file', file)
+    try {
+      const response = await axios.post(
+        address +'/api/image/upload',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      )
+      if (response.status === 200) {
+        if (response.data.success) {
+          alert(`이미지가 성공적으로 업로드되었습니다.`)
+          setImageUrl(`${baseDir}${response.data.message}`)
+        } else {
+          alert('지원하지않는 파일 형식입니다.')
+        }
+      } else {
+        alert('이미지 업로드 실패했습니다.')
+      }
+    } catch (error) {
+      alert(`업로드 중 오류 발생: ${error}`)
+    }
 
+  };
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview.url);
@@ -110,7 +174,9 @@ export default function App() {
           placeholder="이미지 주소입력"
           className="p-2 border border-gray-500 text-black w-80"
         />
-        <button className="ml-2 px-4 bg-gray-700 hover:bg-gray-600 rounded">
+        <button className="ml-2 px-4 bg-gray-700 hover:bg-gray-600 rounded"
+                onClick={send}
+        >
           변환
         </button>
       </div>

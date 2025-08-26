@@ -83,7 +83,6 @@ export default function App() {
 
   const onChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]){
-        alert("asd")
         addFile(e.target.files[0]);
         setFile(e.target.files[0])
         } addFile(e.target.files[0]);
@@ -103,11 +102,11 @@ export default function App() {
         },
       )
       if (response.status === 200) {
-        if (response.data.success) {
+
+        if (response.data.success === true) {
           alert(`이미지가 성공적으로 업로드되었습니다.`)
-          setImageUrl(`${baseDir}${response.data.message}`)
-        } else {
-          alert('지원하지않는 파일 형식입니다.')
+        } else if (response.data.success === false){
+          alert(`${response.data.message}`)
         }
       } else {
         alert('이미지 업로드 실패했습니다.')

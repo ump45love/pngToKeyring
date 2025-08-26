@@ -9,13 +9,24 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ll.code.util.other.IPLimit;
+
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @org.springframework.stereotype.Service
 public class Service {
-	public static Map<Boolean, String> upload(MultipartFile file) {
+	private final IPLimit ipLimit;
+
+
+	public Map<Boolean, String> upload(MultipartFile file,String ip) {
 		Map<Boolean, String> response = new HashMap<Boolean, String>();
+		if(ipLimit.checkIp(ip)){
+			response.put(false, "잠시후 시도해주세요");
+			return response;
+		}
 		if (file.isEmpty()) {
 			response.put(false, "이미지 업로드에 실패했습니다.");
 			return response;
@@ -28,7 +39,6 @@ public class Service {
 
 		String staticUrl = "images/"+ name;
 		String saveUrl = getStaticDirectory() + staticUrl;
-		System.out.println(saveUrl);
 		File destFile = new File(saveUrl);
 		if (!destFile.getParentFile().exists()) {
 			destFile.getParentFile().mkdirs();
